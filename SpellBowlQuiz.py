@@ -182,7 +182,9 @@ def reset_session():
     current_index = 0
     counter = 0
     missed_list = []
-    missed_label_box.config(text = "")
+    missed_label_box.config(state="normal")
+    missed_label_box.delete("1.0", "end")
+    missed_label_box.config(state="disabled")
     reset()
 
 def speak_word():
@@ -332,6 +334,7 @@ def show_label(type):
 
 def check_word():
     global score, total, current_index, current_list, counter
+    missed_label_box.config(state="normal")
     if counter == 0:
         total += 1
     if text_input.get() == current_list[current_index]:
@@ -342,7 +345,8 @@ def check_word():
         else:
             counter = 0
             missed_list.append(current_list[current_index-1])
-            missed_label_box.config(text = '\n'.join(missed_list))
+            missed_label_box.delete("1.0", "end")
+            missed_label_box.insert("1.0", '\n'.join(missed_list))
     else:
         if counter == 0 or counter == 1:
             show_label(2)
@@ -350,9 +354,11 @@ def check_word():
         elif counter == 2:
             show_label(3)
             missed_list.append(current_list[current_index])
-            missed_label_box.config(text = '\n'.join(missed_list))
+            missed_label_box.delete("1.0", "end")
+            missed_label_box.insert("1.0", '\n'.join(missed_list))
             increase_index()
             counter = 0
+    missed_label_box.config(state="disabled")
     reset()
 
 #allows window resizing (not perfect)
@@ -475,8 +481,15 @@ missed_label = Label(root, text="Missed Words:", font=("serif", 25, "bold"), bg 
 missed_label.place(relx=1125/1707, rely=475/1067)
 
 #missed words label box
-missed_label_box = Label(root, text="", font= ("serif", 25),  bg="white", highlightthickness=3, highlightbackground="black", highlightcolor="black", justify = LEFT, anchor = "nw")
+#missed_label_box = Label(root, text="", font= ("serif", 25),  bg="white", highlightthickness=3, highlightbackground="black", highlightcolor="black", justify = LEFT, anchor = "nw")
+missed_label_box = Text(root, font=("serif", 25), bg="white", wrap="word", highlightthickness=3, highlightbackground="black", fg="black")
 missed_label_box.place(relx=1125/1707, rely=540/1067, relwidth = 500/1707, relheight = 500/1067)
+
+#missed words box scroll bar
+scrollbar = Scrollbar(root, command=missed_label_box.yview)
+scrollbar.place(relx=(1125+500)/1707, rely=540/1067, relheight=500/1067, anchor="nw")
+missed_label_box.configure(yscrollcommand=scrollbar.set)
+missed_label_box.config(state="disabled")
 
 #check button
 check_button = Button(root, text="Check", font=("serif",30,"bold"), activebackground = DARK_ORANGE, bd = 5, bg=DARK_ORANGE, command=check_word)
